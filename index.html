@@ -190,12 +190,25 @@ footer{padding:36px 0 60px;color:var(--ink2);font-size:13.5px;border-top:1px sol
 }
 
 /* ---- v2: personalise + source-aware ---- */
-.persona{position:relative;z-index:2;margin-top:-56px}
-.pcard{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);padding:22px 26px;display:grid;grid-template-columns:1fr 1.3fr;gap:40px;box-shadow:0 10px 30px rgba(16,27,58,.12)}
-.pcard label,.pcard .plabel{display:block;font-weight:800;font-size:15px;margin-bottom:8px}
-.pcard select{font:inherit;font-size:15px;width:100%;max-width:440px;padding:10px 12px;border:2px solid var(--ink);border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
-.pcard .seg{margin:0 0 8px}
-.phint{font-size:13.5px;color:var(--ink2);margin:8px 0 0}
+.persona{background:var(--paper);padding:22px 0 0;position:relative;z-index:5}
+.pcard{background:#fff;border:1px solid var(--line);border-left:4px solid var(--red);padding:14px 20px;display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:12px 36px;align-items:start}
+.pcard label,.pcard .plabel{display:block;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink2);margin-bottom:6px}
+.native-hidden{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.dd{position:relative}
+.dd-btn{font:inherit;font-size:14px;width:100%;text-align:left;padding:8px 34px 8px 12px;border:2px solid var(--ink);border-radius:4px;background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.dd-btn::after{content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;border:solid var(--ink);border-width:0 2px 2px 0;transform:translateY(-70%) rotate(45deg)}
+.dd-btn[aria-expanded=true]::after{transform:translateY(-30%) rotate(-135deg)}
+.dd-list{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:min(520px,90vw);max-height:340px;overflow:auto;margin:0;padding:6px 0;list-style:none;background:#fff;border:2px solid var(--ink);border-radius:4px;box-shadow:0 8px 24px rgba(16,27,58,.18);z-index:50}
+.dd-list[hidden]{display:none}
+.dd-grp{padding:8px 14px 3px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+.dd-opt{padding:8px 14px;font-size:14px;cursor:pointer}
+.dd-opt:hover,.dd-opt:focus{background:#EAF1FA;outline:none}
+.dd-opt[aria-selected=true]{font-weight:700;color:var(--deep)}
+.pcard .seg{margin:0}
+.pcard .seg button{font-size:13px;padding:6px 12px}
+.phint{font-size:12.5px;color:var(--ink2);margin:6px 0 0}
+.hero{padding-bottom:48px}
+#route{padding-top:34px}
 .srctag{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;background:var(--soft);color:var(--ink2);padding:1px 8px;border-radius:10px;white-space:nowrap;vertical-align:1px}
 body:not([data-source="all"]) .srctag{display:none}
 body[data-source="api"] [data-src]:not([data-src~="api"]),
@@ -211,7 +224,7 @@ body:not([data-xl="1"]) .xlx{display:none}
 .tab.isskip::after{content:"skipped";font-size:11px;font-weight:400;margin-left:8px}
 .phase.skipped .pgrid,.phase.skipped .selfcheck,.phase.skipped .markdone{display:none}
 .note{background:#EAF1FA;border-left:5px solid var(--deep);padding:14px 18px;margin:0 0 26px;font-size:15px}
-@media (max-width:900px){.pcard{grid-template-columns:1fr;gap:22px}.persona{margin-top:-36px}}
+@media (max-width:900px){.pcard{grid-template-columns:1fr}}
 </style>
 </head>
 <body data-source="all" data-xl="0">
@@ -234,10 +247,11 @@ body:not([data-xl="1"]) .xlx{display:none}
   </div>
 </header>
 
-<section class="persona" aria-label="Personalise this guide"><div class="wrap wide"><div class="pcard">
+<section class="persona" aria-label="Personalise this guide"><div class="wrap"><div class="pcard">
   <div>
-    <label for="bgSel">Your background</label>
-    <select id="bgSel">
+    <label for="bgBtn">Your background</label>
+    <div class="dd" id="bgDd"><button type="button" class="dd-btn" id="bgBtn" aria-haspopup="listbox" aria-expanded="false"></button><ul class="dd-list" id="bgList" role="listbox" aria-label="Your background" hidden></ul></div>
+    <select id="bgSel" class="native-hidden" tabindex="-1" aria-hidden="true">
       <option value="none">Plain explanation (no analogy)</option>
       <optgroup label="Spreadsheets">
         <option value="vba">Excel with VBA</option>
@@ -978,12 +992,12 @@ var WORDS=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine'
 function applyPersona(){
   document.body.setAttribute('data-source',state.src);
   document.body.setAttribute('data-xl',(['vba','excel','fin','bi'].indexOf(state.bg)>-1)?'1':'0');
-  document.getElementById('bgSel').value=state.bg;
+  document.getElementById('bgSel').value=state.bg; syncDd();
   qsa('#srcSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.s===state.src));});
   document.getElementById('srcHint').textContent=SRC[state.src];
   document.getElementById('bgHint').textContent=(state.bg==='none')
-    ? 'Pick the background closest to yours. The guide will explain things with analogies from it. You can change it at any time.'
-    : 'Explanations now use analogies from your background. Change it at any time.';
+    ? 'Pick the background closest to yours for tailored analogies.'
+    : 'Analogies now use your background.';
   /* analogy boxes */
   qsa('[data-ana]').forEach(function(box){
     var t=box.getAttribute('data-ana'), d=ANA[t]||{};
@@ -1079,6 +1093,49 @@ function renderFx(){
 }
 monSeg.addEventListener('click',function(e){var b=e.target.closest('button');if(b){mon=+b.dataset.m;renderFx();}});
 document.getElementById('acctSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(b){acct=b.dataset.a;renderFx();}});
+
+/* custom dropdown: always opens downward */
+var bgSel=document.getElementById('bgSel'), bgBtn=document.getElementById('bgBtn'), bgList=document.getElementById('bgList');
+(function buildDd(){
+  var h='';
+  Array.prototype.slice.call(bgSel.children).forEach(function(c){
+    if(c.tagName==='OPTGROUP'){
+      h+='<li class="dd-grp" role="presentation">'+c.label+'</li>';
+      Array.prototype.slice.call(c.children).forEach(function(o){h+='<li class="dd-opt" role="option" tabindex="-1" data-v="'+o.value+'">'+o.textContent+'</li>';});
+    }else{h+='<li class="dd-opt" role="option" tabindex="-1" data-v="'+c.value+'">'+c.textContent+'</li>';}
+  });
+  bgList.innerHTML=h;
+})();
+function ddOpts(){return qsa('#bgList .dd-opt');}
+function syncDd(){
+  var cur=bgSel.options[bgSel.selectedIndex];
+  bgBtn.textContent=cur?cur.textContent:'';
+  ddOpts().forEach(function(li){li.setAttribute('aria-selected',String(li.dataset.v===bgSel.value));});
+}
+function openDd(){
+  bgList.hidden=false; bgBtn.setAttribute('aria-expanded','true');
+  var sel=ddOpts().filter(function(li){return li.dataset.v===bgSel.value;})[0]||ddOpts()[0];
+  sel.focus();
+}
+function closeDd(focusBtn){
+  bgList.hidden=true; bgBtn.setAttribute('aria-expanded','false');
+  if(focusBtn){bgBtn.focus();}
+}
+function pickDd(li){
+  bgSel.value=li.dataset.v; closeDd(true);
+  bgSel.dispatchEvent(new Event('change'));
+}
+bgBtn.addEventListener('click',function(){if(bgList.hidden){openDd();}else{closeDd(false);}});
+bgBtn.addEventListener('keydown',function(e){if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();openDd();}});
+bgList.addEventListener('click',function(e){var li=e.target.closest('.dd-opt');if(li){pickDd(li);}});
+bgList.addEventListener('keydown',function(e){
+  var o=ddOpts(), i=o.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'){e.preventDefault();o[Math.min(i+1,o.length-1)].focus();}
+  else if(e.key==='ArrowUp'){e.preventDefault();o[Math.max(i-1,0)].focus();}
+  else if(e.key==='Enter'||e.key===' '){e.preventDefault();if(i>-1){pickDd(o[i]);}}
+  else if(e.key==='Escape'||e.key==='Tab'){closeDd(e.key==='Escape');}
+});
+document.addEventListener('click',function(e){if(!bgList.hidden&&!document.getElementById('bgDd').contains(e.target)){closeDd(false);}});
 
 addBadges();
 applyPersona();

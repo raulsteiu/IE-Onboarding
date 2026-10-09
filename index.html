@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Integration onboarding: from signed contract to live data</title>
+<style>
+:root{
+  --paper:#F9F9F9; --ink:#101B3A; --ink2:#46506B; --line:#D9D8E2; --soft:#E4E3EA;
+  --deep:#2961AC; --blue:#448CCF; --indigo:#4E4EAC; --red:#EF363D; --reddk:#C2202A; --white:#fff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55;font-size:16px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+.wrap.wide{max-width:1480px}
+h1,h2,h3,h4{line-height:1.1;letter-spacing:-.02em;margin:0}
+p{margin:0 0 12px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+code{font-family:Consolas,"SFMono-Regular",Menlo,monospace;font-size:.92em;background:#ECEDF5;padding:1px 5px;border-radius:3px}
+
+/* HERO */
+.hero{background:linear-gradient(120deg,#0d1632 0%,#16285a 55%,#2961AC 150%);color:#fff;position:relative;overflow:hidden;padding-bottom:80px}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:22px 0;font-size:14px;color:#c9d3ee;position:relative;z-index:1}
+.topbar b{color:#fff;font-size:17px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.7rem);font-weight:800;max-width:14ch;letter-spacing:-.04em;margin:52px 0 22px;position:relative;z-index:1}
+.note b{color:var(--ink)}
+.note p{margin:0}
+.lede{max-width:58ch;font-size:1.15rem;color:#d7def2;position:relative;z-index:1}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;margin-top:48px;max-width:880px;position:relative;z-index:1}
+.three div{border-top:4px solid var(--red);padding-top:12px}
+.three strong{display:block;font-size:1.7rem;letter-spacing:-.02em}
+.three span{color:#c9d3ee;font-size:.95rem;display:block;margin-top:4px}
+.hex{position:absolute;right:-90px;top:-30px;width:640px;opacity:.28;pointer-events:none}
+.hex polygon{fill:none;stroke:#7fa9e0;stroke-width:1.5;stroke-dasharray:420;stroke-dashoffset:420;animation:draw 2.4s ease-out .2s forwards}
+.hex polygon:nth-child(2){animation-delay:.5s}.hex polygon:nth-child(3){animation-delay:.8s}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* SECTIONS */
+.sec{padding:64px 0}
+.sec h2{font-size:clamp(1.8rem,3.4vw,2.7rem);margin-bottom:12px;letter-spacing:-.03em}
+.intro{max-width:66ch;color:var(--ink2);margin:0 0 28px;font-size:1.05rem}
+.btn{font:inherit;font-size:14px;font-weight:700;border:2px solid var(--ink);background:transparent;color:var(--ink);padding:9px 16px;border-radius:4px;cursor:pointer}
+.btn:hover{background:var(--ink);color:#fff}
+.btn:disabled{opacity:.35;cursor:default;background:transparent;color:var(--ink)}
+.btn.primary{background:var(--deep);border-color:var(--deep);color:#fff}
+.btn.primary:hover{background:var(--ink);border-color:var(--ink)}
+.btn.done{background:var(--red);border-color:var(--red);color:#fff}
+
+/* ROUTE MAP */
+.maphead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.progress{font-size:14px;color:var(--ink2);display:flex;gap:14px;align-items:center}
+.mapscroll{overflow-x:auto;background:#fff;border:1px solid var(--line)}
+.map{--lab:150px;position:relative;display:grid;grid-template-columns:var(--lab) repeat(7,minmax(120px,1fr));min-width:990px}
+.rail{position:absolute;top:32px;height:4px;left:calc(var(--lab) + (100% - var(--lab))/14);right:calc((100% - var(--lab))/14);background:var(--soft);z-index:0}
+.rail i{display:block;height:100%;width:0;background:var(--red);transition:width .5s}
+.st{position:relative;z-index:1;background:none;border:0;font:inherit;color:inherit;padding:12px 8px 14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.node{width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid var(--ink);display:grid;place-items:center;font-weight:800;font-size:18px;transition:background .2s,box-shadow .2s}
+.nm{font-size:13.5px;font-weight:700;line-height:1.2}
+.st.on .node{background:var(--deep);border-color:var(--deep);color:#fff;box-shadow:0 0 0 5px rgba(68,140,207,.28)}
+.st.done .node{background:var(--red);border-color:var(--red);color:transparent;position:relative}
+.st.done .node::after{content:"";position:absolute;width:10px;height:18px;border:solid #fff;border-width:0 4px 4px 0;transform:rotate(45deg) translate(-2px,-2px)}
+.st.done.on .node{box-shadow:0 0 0 5px rgba(68,140,207,.35)}
+.ll{padding:16px 12px;border-top:1px solid var(--line);border-left:6px solid var(--lc,var(--ink));display:flex;flex-direction:column;justify-content:center}
+.ll b{font-size:15px}.ll span{font-size:12.5px;color:var(--ink2)}
+.l-us{--lc:var(--deep)}.l-sup{--lc:var(--indigo)}.l-cl{--lc:var(--blue)}.lg{--lc:var(--red)}
+.c{padding:16px 12px;border-top:1px solid var(--line);font-size:13.5px;line-height:1.4;cursor:pointer;transition:background .2s}
+.c.none{color:#9aa0b4;font-style:italic}
+.c.g{border-top:2px solid var(--ink);font-weight:700;color:var(--reddk);font-size:13px}
+.dia{display:inline-block;width:9px;height:9px;background:var(--red);transform:rotate(45deg);margin-right:9px;vertical-align:1px}
+.c:hover{background:#F1F4FA}
+.c.on,.st.on{background:rgba(41,97,172,.08)}
+.legend{font-size:13.5px;color:var(--ink2);margin-top:12px}
+
+/* PHASE DETAIL */
+#detail{background:var(--paper);padding-top:8px}
+.tabs{display:flex;overflow-x:auto;overflow-y:hidden;box-shadow:inset 0 -2px 0 var(--line);margin:0 0 36px;scrollbar-width:thin}
+.tab{flex:1 1 auto;text-align:center;font:inherit;font-weight:700;font-size:14.5px;background:none;border:0;padding:14px 18px;cursor:pointer;white-space:nowrap;color:var(--ink2);border-bottom:4px solid transparent}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--deep)}
+.tab.isdone::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:8px}
+.phead h3{font-size:clamp(1.7rem,3vw,2.4rem);letter-spacing:-.03em;margin-bottom:10px}
+.goal{font-size:1.15rem;color:var(--ink2);max-width:62ch;margin-bottom:30px}
+.pgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:48px;align-items:start}
+.sub{font-size:1.1rem;margin:0 0 12px}
+.who{margin:0 0 30px;padding:0;list-style:none}
+.who li{display:grid;grid-template-columns:150px 1fr;gap:14px;padding:11px 0;border-top:1px solid var(--line);font-size:15px}
+.who li:last-child{border-bottom:1px solid var(--line)}
+.who b{display:flex;align-items:center;gap:9px}
+.who b::before{content:"";width:6px;height:20px;background:var(--lc)}
+.gate{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);padding:18px 20px;margin-bottom:30px}
+.gate h4{font-size:1.05rem;margin-bottom:10px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:15px;cursor:pointer}
+.chk input{width:18px;height:18px;margin-top:2px;accent-color:var(--deep);flex:none}
+.aside .box{padding:18px 20px;margin-bottom:22px;font-size:15px}
+.vba{background:#ECECF8;border-left:5px solid var(--indigo)}
+.watch{background:#FDEDEE;border-left:5px solid var(--red)}
+.aside .box h4{font-size:1.02rem;margin-bottom:8px}
+.aside .box p:last-child{margin-bottom:0}
+details.deep{border-top:1px solid var(--line);padding:14px 0}
+details.deep:last-of-type{border-bottom:1px solid var(--line)}
+details summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--deep)}
+details[open]>summary::after{content:"\2212"}
+details .inner{padding-top:12px;font-size:15px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:6px 30px}
+.cols2 h5{margin:12px 0 4px;font-size:14px;color:var(--deep)}
+.cols2 ul,.inner ul{margin:0 0 8px;padding-left:20px}
+.cols2 li,.inner li{margin-bottom:3px}
+.selfcheck{margin-top:34px}
+.selfcheck h4{font-size:1.1rem;margin-bottom:8px}
+details.q{background:#fff;border:1px solid var(--line);padding:12px 16px;margin-bottom:8px}
+details.q summary{font-weight:700;font-size:15px}
+details.q summary::after{content:"Show answer";font-size:13px;color:var(--deep);white-space:nowrap}
+details.q[open]>summary::after{content:"Hide";}
+details.q p{margin:10px 0 0;font-size:15px;color:var(--ink2)}
+.pfoot{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px;padding-top:22px;border-top:2px solid var(--ink)}
+.pfoot .sp{flex:1}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 10px}
+.tbl th{text-align:left;font-size:13.5px;color:var(--ink2);border-bottom:2px solid var(--ink);padding:8px 10px 8px 0}
+.tbl td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+pre.code{background:#0d1632;color:#e6ecff;padding:16px 18px;overflow:auto;font:13px/1.55 Consolas,"SFMono-Regular",Menlo,monospace;margin:0 0 6px;border-radius:0 0 4px 4px}
+.cap{font-size:13px;font-weight:700;padding:7px 14px;color:#fff;border-radius:4px 4px 0 0}
+.cap.ok{background:var(--deep)}.cap.no{background:var(--reddk)}.cap.neutral{background:var(--ink2)}
+
+/* FC process diagram */
+.fcproc{display:grid;grid-template-columns:1fr 1.7fr 1fr;gap:10px;margin:8px 0 14px}
+.fcproc>div{border:2px solid var(--line);background:#fff;padding:12px;font-size:14px}
+.fcproc .me{border-color:var(--deep);background:#EAF1FA}
+.fcproc b{display:block;margin-bottom:4px}
+.fcproc ol{margin:6px 0 0;padding-left:20px}
+.fcproc small{color:var(--ink2)}
+
+/* TOOLBOX */
+.toolbox{background:#ECEDF5}
+.ttabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.ttab{font:inherit;font-weight:700;font-size:14.5px;background:#fff;border:2px solid var(--ink);padding:10px 16px;cursor:pointer;border-radius:4px}
+.ttab[aria-selected=true]{background:var(--ink);color:#fff}
+.tpanel[hidden]{display:none}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.tree .t{padding:9px 12px;background:#fff;border-left:5px solid var(--deep);margin-bottom:6px;font-size:14.5px}
+.tree .t span{display:block;color:var(--ink2);font-size:13px}
+.tree .t1{margin-left:22px;border-left-color:var(--indigo)}.tree .t2{margin-left:44px;border-left-color:var(--blue)}.tree .t3{margin-left:66px;border-left-color:var(--ink2)}
+.job{background:#fff;border:2px solid var(--ink);padding:14px}
+.job .jh{font-weight:800;margin-bottom:10px}
+.stp{border-top:1px dashed var(--line);padding:10px 0}
+.stp .sl{font-weight:700;font-size:14.5px}.stp .sl small{font-weight:400;color:var(--ink2);margin-left:6px}
+.tasks{display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap}
+.tasks span{background:#EAF1FA;border:1px solid var(--deep);padding:6px 14px;font-size:13.5px}
+.par{font-size:12.5px;color:var(--reddk);font-weight:700}
+.facts{margin:0;padding:0;list-style:none}
+.facts li{padding:10px 0;border-top:1px solid #cfd2e2;font-size:15px}
+.facts li:last-child{border-bottom:1px solid #cfd2e2}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.seg button{font:inherit;font-size:14px;font-weight:700;padding:7px 13px;border:2px solid var(--ink);background:#fff;cursor:pointer;border-radius:4px}
+.seg button[aria-pressed=true]{background:var(--deep);border-color:var(--deep);color:#fff}
+.fx{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+.fx>div{background:#fff;padding:16px 18px;border-top:5px solid var(--deep)}
+.fx>div.fpa{border-top-color:var(--indigo)}
+.fx small{color:var(--ink2);display:block;font-size:13px}
+.fx .key{font:700 17px Consolas,Menlo,monospace;margin:6px 0 2px}
+.fx .val{font-size:2.3rem;font-weight:800;letter-spacing:-.03em}
+.moves{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px}
+.move{background:#fff;padding:14px 16px;border-left:5px solid var(--deep);font-size:14.5px}
+.move h4{font-size:1rem;margin-bottom:2px}
+.move .xl{color:var(--ink2);font-size:13.5px;margin-bottom:8px}
+.move pre{margin:0;background:#0d1632;color:#e6ecff;padding:10px 12px;font:12.5px/1.5 Consolas,Menlo,monospace;overflow:auto;border-radius:3px}
+.moves-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* SURVIVAL */
+.surv{display:grid;grid-template-columns:1.25fr 1fr;gap:56px;align-items:start}
+.gotchas{counter-reset:g;margin:0;padding:0;list-style:none}
+.gotchas li{counter-increment:g;display:grid;grid-template-columns:34px 1fr;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:15px}
+.gotchas li::before{content:counter(g);font-weight:800;color:var(--red);font-size:1.3rem;line-height:1.1}
+.gotchas li:last-child{border-bottom:1px solid var(--line)}
+.how{background:var(--ink);color:#fff;padding:26px 28px;margin-top:40px}
+.how h3{font-size:1.4rem;margin-bottom:12px}
+.how ul{margin:0;padding-left:20px;color:#d7def2}
+.how li{margin-bottom:6px}
+footer{padding:36px 0 60px;color:var(--ink2);font-size:13.5px;border-top:1px solid var(--line)}
+
+@media (max-width:900px){
+  .pgrid,.tgrid,.surv,.moves-wrap,.cols2,.fx{grid-template-columns:1fr}
+  .three{grid-template-columns:1fr}
+  .who li{grid-template-columns:1fr;gap:2px}
+  .fcproc{grid-template-columns:1fr}
+  .wrap{padding:0 18px}
+}
+
+/* ---- v2: personalise + source-aware ---- */
+.persona{position:relative;z-index:2;margin-top:-56px}
+.pcard{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);padding:22px 26px;display:grid;grid-template-columns:1fr 1.3fr;gap:40px;box-shadow:0 10px 30px rgba(16,27,58,.12)}
+.pcard label,.pcard .plabel{display:block;font-weight:800;font-size:15px;margin-bottom:8px}
+.pcard select{font:inherit;font-size:15px;width:100%;max-width:440px;padding:10px 12px;border:2px solid var(--ink);border-radius:4px;background:#fff;color:var(--ink);cursor:pointer}
+.pcard .seg{margin:0 0 8px}
+.phint{font-size:13.5px;color:var(--ink2);margin:8px 0 0}
+.srctag{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;background:var(--soft);color:var(--ink2);padding:1px 8px;border-radius:10px;white-space:nowrap;vertical-align:1px}
+body:not([data-source="all"]) .srctag{display:none}
+body[data-source="api"] [data-src]:not([data-src~="api"]),
+body[data-source="sql"] [data-src]:not([data-src~="sql"]),
+body[data-source="sftp"] [data-src]:not([data-src~="sftp"]){display:none!important}
+body:not([data-xl="1"]) .xlx{display:none}
+.st.skip .node{border-style:dashed;border-color:#9aa0b4;color:#9aa0b4;background:#f1f1f6}
+.st.skip .nm{color:#8a90a6}
+.nm small{display:block;font-weight:400;font-size:11px;color:#8a90a6}
+.c.skipcell{background:repeating-linear-gradient(135deg,#fafafa,#fafafa 8px,#f1f1f6 8px,#f1f1f6 16px);color:#8a90a6}
+.c.skipcell.g{color:#8a90a6}
+.tab.isskip{opacity:.55}
+.tab.isskip::after{content:"skipped";font-size:11px;font-weight:400;margin-left:8px}
+.phase.skipped .pgrid,.phase.skipped .selfcheck,.phase.skipped .markdone{display:none}
+.note{background:#EAF1FA;border-left:5px solid var(--deep);padding:14px 18px;margin:0 0 26px;font-size:15px}
+@media (max-width:900px){.pcard{grid-template-columns:1fr;gap:22px}.persona{margin-top:-36px}}
+</style>
+</head>
+<body data-source="all" data-xl="0">
+
+<header class="hero">
+  <svg class="hex" viewBox="0 0 640 560" aria-hidden="true">
+    <polygon points="320,20 560,150 560,410 320,540 80,410 80,150"/>
+    <polygon points="320,90 500,188 500,372 320,470 140,372 140,188"/>
+    <polygon points="320,160 440,226 440,334 320,400 200,334 200,226"/>
+  </svg>
+  <div class="wrap">
+    <div class="topbar"><b>Our company Data Integration</b><span>Team onboarding, internal use</span></div>
+    <h1>From signed contract to live data</h1>
+    <p class="lede">Every integration we build follows the same route, with one phase (the Postman check) that only applies to API sources. Learn the route first, then open any stop to see the detail. Start by choosing your background and data source just below, then click a phase on the map.</p>
+    <div class="three">
+      <div><strong>Pull</strong><span>We fetch data from the source. We never accept pushes.</span></div>
+      <div><strong>Batch</strong><span>Scheduled loads only. Nothing live, nothing streaming.</span></div>
+      <div><strong>Stage</strong><span>Every row lands in MySQL staging before it reaches Our company.</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="persona" aria-label="Personalise this guide"><div class="wrap wide"><div class="pcard">
+  <div>
+    <label for="bgSel">Your background</label>
+    <select id="bgSel">
+      <option value="none">Plain explanation (no analogy)</option>
+      <optgroup label="Spreadsheets">
+        <option value="vba">Excel with VBA</option>
+        <option value="excel">Excel formulas and pivots (no VBA)</option>
+      </optgroup>
+      <optgroup label="Data and databases">
+        <option value="sql">SQL / relational databases</option>
+        <option value="bi">BI tools (Power BI, Tableau)</option>
+      </optgroup>
+      <optgroup label="Programming">
+        <option value="js">JavaScript / TypeScript</option>
+        <option value="cj">C# / Java</option>
+        <option value="py">Python</option>
+      </optgroup>
+      <optgroup label="Integration">
+        <option value="etl">ETL / integration tools (SSIS, Informatica, Talend, SnapLogic, Boomi, Azure Data Factory)</option>
+        <option value="api">API / REST / Postman</option>
+      </optgroup>
+      <optgroup label="Business">
+        <option value="fin">Finance / accounting (no coding)</option>
+      </optgroup>
+    </select>
+    <p class="phint" id="bgHint"></p>
+  </div>
+  <div>
+    <span class="plabel" id="srcLabel">Your data source</span>
+    <div class="seg" id="srcSeg" role="group" aria-labelledby="srcLabel">
+      <button type="button" data-s="all" aria-pressed="true">Not sure yet (show all)</button>
+      <button type="button" data-s="api" aria-pressed="false">API</button>
+      <button type="button" data-s="sql" aria-pressed="false">SQL database</button>
+      <button type="button" data-s="sftp" aria-pressed="false">SFTP / file</button>
+    </div>
+    <p class="phint" id="srcHint"></p>
+  </div>
+</div></div></section>
+
+<main>
+<section class="sec" id="route">
+  <div class="wrap wide">
+    <h2>The route</h2>
+    <p class="intro">Seven phases, three lanes. Read left to right to see who does what at each stage. The red diamonds are gates: nothing moves forward until the gate is met. Phase 3 applies to API sources only and is skipped for SQL and SFTP sources. Most delays in our work happen at phase 2, waiting on someone else.</p>
+    <div class="maphead">
+      <div class="progress"><span id="progText">0 of 7 phases marked complete</span><button class="btn" id="resetBtn" type="button">Reset progress</button></div>
+    </div>
+    <div class="mapscroll"><div class="map" id="map"></div></div>
+    <p class="legend">Click any phase, or any cell in its column, to open the detail below. Mark phases complete as you learn them and the route fills in.</p>
+  </div>
+</section>
+
+<section class="sec" id="detail" aria-label="Phase detail">
+  <div class="wrap">
+    <div class="tabs" id="phaseTabs" role="tablist">
+      <button class="tab" role="tab" data-phase="1">1 Scoping call</button>
+      <button class="tab" role="tab" data-phase="2">2 Provisioning</button>
+      <button class="tab" role="tab" data-phase="3">3 Postman check (API only)</button>
+      <button class="tab" role="tab" data-phase="4">4 DI Studio build</button>
+      <button class="tab" role="tab" data-phase="5">5 Staging check</button>
+      <button class="tab" role="tab" data-phase="6">6 Load and schedule</button>
+      <button class="tab" role="tab" data-phase="7">7 Sign-off</button>
+    </div>
+
+    <!-- PHASE 1 -->
+    <article class="phase" id="p1">
+      <div class="phead"><h3>1. Scoping call</h3>
+      <p class="goal">Decide how data will travel from their system to ours, and who owns every dependency, before anyone writes code.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Lead the call (Teams, usually recorded). If the client set it up there may be no transcript, so take your own notes. Listen for blockers and signal an effort tier.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Not involved yet.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Should bring their IT team or ERP partner. If they are not on the call, ask when you can get them.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: confirm all of this before you hang up</h4>
+            <label class="chk"><input type="checkbox" data-id="g1-1"> Integration path agreed: API, SQL, SFTP file, or a hybrid</label>
+            <label class="chk"><input type="checkbox" data-id="g1-2"> Our company product confirmed: FC, FPA or FPA+</label>
+            <label class="chk"><input type="checkbox" data-id="g1-3"> Entity count and rough dimension scope known</label>
+            <label class="chk"><input type="checkbox" data-id="g1-4"> An owner named for each prerequisite: API config, credentials, firewall rules</label>
+            <label class="chk"><input type="checkbox" data-id="g1-5"> Next steps written down with owners and rough dates</label>
+            <label class="chk"><input type="checkbox" data-id="g1-6"> Effort tier signalled: 24h, 40h or 80h</label>
+            <label class="chk"><input type="checkbox" data-id="g1-7"> Open unknowns listed explicitly</label>
+          </div>
+          <details class="deep"><summary>The question checklist</summary><div class="inner cols2">
+            <div>
+              <h5>Source system</h5><ul><li>Which ERP, and which version?</li><li>Cloud, on-premises or hybrid?</li><li>Who runs the environment: client IT, an ERP partner, a third party?</li></ul>
+              <h5 data-src="api">Connection and API</h5><ul data-src="api"><li>Is there an API (REST, OData, SOAP)? Reachable over public HTTPS?</li><li>Which authentication: OAuth2, Basic, API key, session token?</li><li>Has the client tested it? Can they share a Postman collection or curl?</li><li>Rate limits, session timeouts, concurrency limits?</li></ul>
+              <h5>Network and firewall</h5><ul><li>Do they need to allow inbound connections from Our company? Who owns that?</li><li>Any IP ranges we must whitelist on our side?</li><li>On-prem: VPN or tunnel, or can the API be exposed?</li></ul>
+              <h5 data-src="api sftp">Fallback files</h5><ul data-src="api sftp"><li>If no API: can they deliver a CSV or flat file by SFTP?</li><li>Format, naming convention and frequency?</li></ul>
+            </div>
+            <div>
+              <h5>Data scope</h5><ul><li>How many companies or entities?</li><li>How many years of history?</li><li>Which dimensions, and how many members?</li><li>FC, FPA or both?</li><li>Drill Across (transaction detail), or GL balances only?</li><li>Is budget or forecast in scope?</li><li>Single currency or multi-currency?</li></ul>
+              <h5>Our company side</h5><ul><li>Instance URL and live product?</li><li>Is our company's model built, or still in progress?</li><li>Who is our company's consultant for dimension questions?</li></ul>
+              <h5>Timeline and ownership</h5><ul><li>Go-live date or board meeting driving it?</li><li>Who owns API config, credentials and firewall rules?</li><li>How does the client create a read-only integration user?</li></ul>
+            </div>
+          </div></details>
+          <details class="deep"><summary>Effort tiers</summary><div class="inner">
+            <table class="tbl"><tr><th>Tier</th><th>Typical case</th></tr>
+              <tr><td><b>Standard, 24h</b></td><td>Direct SQL from views or tables, or an SFTP/CSV file that is already clean and structured.</td></tr>
+              <tr><td><b>Enhanced, 40h</b></td><td>Well-known, documented ERP APIs, or SQL that needs query research.</td></tr>
+              <tr><td><b>Premium, 80h</b></td><td>New or undocumented ERPs, first-time complex API work, modern data warehouse platforms.</td></tr></table>
+          </div></details>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p1"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>Never paper over a blocker with optimism. If the ERP is new to us, say it is a research item and size it as Premium. Never over-promise on a call.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>The client says their API is only reachable inside their network. What do you do?</summary><p>Treat it as a blocker with an owner. Find out who controls the firewall or VPN, whether the API can be exposed, and whether an SFTP file export is a workable alternative. Write it in the open unknowns list.</p></details>
+        <details class="q"><summary>Which effort tier fits a well-documented ERP API integration?</summary><p>Enhanced, 40h. Direct SQL or a clean SFTP file is Standard (24h). A new or undocumented ERP is Premium (80h).</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev" disabled>Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="1">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 2 -->
+    <article class="phase" id="p2" hidden>
+      <div class="phead"><h3>2. Provisioning</h3>
+      <p class="goal">Get the plumbing in place. Two tracks run in parallel, and both block the build.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Raise the Zendesk tickets the same day as the call. Actively chase the client items, because they are the most common delay.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Provides the DIS (hosted or on-prem), MySQL RDS staging, SFTP and IP whitelisting.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Provides credentials, an integration user, firewall changes and test access.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: both tracks delivered</h4>
+            <label class="chk"><input type="checkbox" data-id="g2-1"> Zendesk tickets raised and fulfilled (DIS, MySQL RDS, SFTP, whitelist as needed)</label>
+            <label class="chk"><input type="checkbox" data-id="g2-2"> MySQL staging credentials in hand</label>
+            <label class="chk" data-src="api"><input type="checkbox" data-id="g2-3"> API credentials received: client ID, secret, OAuth registration where relevant</label>
+            <label class="chk"><input type="checkbox" data-id="g2-4"> Integration user created with read permission on the financial tables</label>
+            <label class="chk" data-src="api"><input type="checkbox" data-id="g2-5"> Test endpoint reachable from outside the client network (API sources)</label>
+            <label class="chk"><input type="checkbox" data-id="g2-6"> Firewall rules allow our company's DIS Controller IPs where required</label>
+            <label class="chk"><input type="checkbox" data-id="g2-7"> Sample data or a test environment available</label>
+          </div>
+          <details class="deep"><summary>Which tickets to raise</summary><div class="inner">
+            <table class="tbl"><tr><th>Situation</th><th>Raise</th></tr>
+              <tr data-src="api sftp"><td>New cloud API client</td><td>Hosted DIS plus MySQL RDS. Add SFTP if files are involved. One combined ticket works.</td></tr>
+              <tr data-src="sql"><td>New on-prem SQL client</td><td>On Prem DIS installation plus MySQL RDS. These are always provisioned together.</td></tr>
+              <tr data-src="sftp"><td>Existing client needs SFTP</td><td>SFTP ticket that includes the client IP range.</td></tr>
+              <tr><td>Client sits behind a firewall</td><td>IP whitelist ticket.</td></tr>
+              <tr><td>Only staging access needed</td><td>MySQL staging credentials ticket.</td></tr></table>
+          </div></details>
+          <details class="deep"><summary>Ticket rules and a sample</summary><div class="inner">
+            <ul>
+              <li>Open with <code>Hi Team,</code>. The one exception is a Hosted DIS request, which goes to a named contact (confirm with your lead).</li>
+              <li>Put the client's Our company instance URL on its own line.</li>
+              <li>SFTP requests must include the client IP range to whitelist.</li>
+              <li>Subject format: <code>[Resource] for [Client Name]</code>, or combined: <code>[Client] Hosted DIS + SFTP + Access to MySql RDS</code>.</li>
+              <li>If you know everything upfront, combine requests into one ticket.</li>
+              <li>If it is commercially urgent, say so in one line before the URL.</li>
+              <li>Close with Regards and your own name. Keep it short and direct.</li>
+            </ul>
+            <div class="cap neutral" data-src="api sftp">Sample: new cloud client, full setup</div>
+<pre class="code" data-src="api sftp">Subject: [Client Name] Hosted DIS + SFTP + Access to MySql RDS
+
+Hi Team,
+
+Can you please provide a hosted DIS Controller (Cloud) Site id for client [Client Name].
+Also, can you provide an Our company SFTP server for this client and the connection
+details to their RDS MySql Staging.
+
+[Our company instance URL]
+
+The client IP range to whitelist for SFTP access is:
+[Client IP range]
+
+Regards,
+[Your name]</pre>
+          </div></details>
+          <details class="deep"><summary>Hosted or on-prem DIS?</summary><div class="inner">
+            <p>DI Studio runs through a Controller. Where that Controller lives decides which ticket you raise.</p>
+            <table class="tbl"><tr><th>Mode</th><th>Controller</th><th>Use when</th></tr>
+              <tr><td>Cloud-hosted DIS</td><td>Our company hosts it in a regional AWS</td><td>Cloud-only data sources</td></tr>
+              <tr><td>On-premises DIS</td><td>Client hosts it</td><td>On-prem ERP or database, or data-residency requirements</td></tr></table>
+            <p>Hosted regions: Americas and APAC use <code>ca-central-1</code>, EMEA uses <code>eu-central-1</code>, UK uses <code>eu-west-2</code>. The agents available differ between on-prem and cloud-hosted, so check before you promise a method.</p>
+          </div></details>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p2"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>Client-side items stall more projects than any technical problem. Keep a running list of who owes what, and follow up on it.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>A client has an on-prem SQL Server ERP. Which tickets?</summary><p>An On Prem DIS installation together with MySQL RDS, usually in one combined ticket. Add an IP whitelist request if firewall rules are involved.</p></details>
+        <details class="q"><summary>What must every SFTP ticket include?</summary><p>The client's Our company instance URL and the client IP range to whitelist for SFTP access.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="2">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 3 -->
+    <article class="phase" id="p3" hidden>
+      <div class="phead"><h3>3. Postman check (API sources only)</h3>
+      <p class="goal">For API sources on a hosted DIS Controller, prove the connection works with real data before you open DI Studio. This is the gate that protects your time.</p></div>
+      <div class="note" id="p3note"></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>API sources only: build the Postman requests, authentication first, then a data endpoint, then page two.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Not involved.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Fixes access issues when the test fails: permissions, firewall, credentials.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate (API sources only): Postman returns real data</h4>
+            <label class="chk"><input type="checkbox" data-id="g3-1"> The auth flow completes end to end</label>
+            <label class="chk"><input type="checkbox" data-id="g3-2"> At least one endpoint returns real rows with the expected field names</label>
+            <label class="chk"><input type="checkbox" data-id="g3-3"> Pagination confirmed: you can reach page 2</label>
+            <label class="chk"><input type="checkbox" data-id="g3-4"> Date format confirmed from an actual response</label>
+            <label class="chk"><input type="checkbox" data-id="g3-5"> Field names and data types noted, with no assumptions</label>
+          </div>
+          <p>For SQL and SFTP sources there is no Postman check, so none of this gate applies.</p>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p3"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>If Postman shows a blocker, send the client the exact error straight away. Do not work around it, and do not start the build.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>The auth works but the data call returns 401. Do you start the DI Studio build?</summary><p>No. The gate is not met. Send the client the specific error and wait for access to be fixed.</p></details>
+        <details class="q"><summary>The client's ERP data comes from SQL views or an SFTP file. Do you run a Postman check?</summary><p>No. The Postman check is only for API sources on a hosted DIS Controller. Skip phase 3 and move on to the build.</p></details>
+        <details class="q"><summary>Why confirm the date format from the real response?</summary><p>Each source formats dates differently, and we always normalise them in staging. Assuming a format is how wrong periods reach Our company.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="3">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 4 -->
+    <article class="phase" id="p4" hidden>
+      <div class="phead"><h3>4. DI Studio build</h3>
+      <p class="goal">Build the job: extract, land in MySQL staging, transform, load. This page gives the shape. The toolbox further down has the detail.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Create the connections, design the job, write the scripts and SQL.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Available for infrastructure problems such as DIS or RDS access.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Answers field mapping and dimension questions as they come up. Expect back and forth.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: the job runs end to end</h4>
+            <label class="chk"><input type="checkbox" data-id="g4-1"> Connections created: source and MySQL staging</label>
+            <label class="chk"><input type="checkbox" data-id="g4-2"> Steps are sequential, and tasks inside a step are safe to run in parallel</label>
+            <label class="chk"><input type="checkbox" data-id="g4-3"> Recreate and Append are not mixed against the same table in one step</label>
+            <label class="chk"><input type="checkbox" data-id="g4-4"> Period logic tested in MySQL Workbench before it went into DI Studio</label>
+            <label class="chk" data-src="api"><input type="checkbox" data-id="g4-5"> Scripts follow the ClearScript rules (see the toolbox)</label>
+            <label class="chk"><input type="checkbox" data-id="g4-6"> New FC builds use the 3-job Process pattern</label>
+          </div>
+          <details class="deep" open><summary>The FC Process pattern for new builds</summary><div class="inner">
+            <p>Every new FC integration is an FC Process with three jobs. DI Studio owns only the middle one.</p>
+            <div class="fcproc">
+              <div><b>Job 1: Select Period</b><small>FC-native job</small></div>
+              <div class="me"><b>Job 2: Data Integration</b><small>The DI Studio job, your work</small>
+                <ol><li>Extract from source</li><li>Load into MySQL staging (Recreate)</li><li>Staging to the FC agent</li></ol></div>
+              <div><b>Job 3: Import to FC</b><small>FC-native job</small></div>
+            </div>
+            <ul>
+              <li>Name the period staging table <code>[clientcode]_FC_[ProcessName]_ConsoCode</code>. The old <code>FC_ViewDataConsoCode</code> name is for legacy standalone jobs only.</li>
+              <li>Filter data to the selected period by joining on it: <code>JOIN [clientcode]_FC_[ProcessName]_ConsoCode v ON TRIM(r.Period) = TRIM(v.Period)</code>.</li>
+              <li>FPA integrations are configured through the FPA Process Manager import instead.</li>
+            </ul>
+          </div></details>
+          <details class="deep"><summary>Set up before you write code</summary><div class="inner"><ul>
+            <li data-src="api">A Script Agent connection, with credentials stored as <code>env[]</code> variables on the connection.</li>
+            <li>A MySQL agent connection to the client's staging RDS.</li>
+            <li data-src="sql sftp">A connection for the source, using the agent type that matches it (see the agent list in the toolbox).</li>
+            <li>Check the team's SQL pattern library before writing any transformation. A proven pattern probably exists.</li>
+            <li>Filters (fiscal year, entity, date range) go on the task as <code>query[]</code> parameters.</li>
+          </ul></div></details>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p4"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>DI Studio only runs whole jobs. To test one step, build a throwaway job containing only that step, or run the SQL directly in MySQL Workbench.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>A task keeps failing. Can you disable it while you debug the rest?</summary><p>No. Tasks and steps cannot be disabled. Build a temporary job with just the part you want to test, or run the SQL or script logic outside DI Studio.</p></details>
+        <details class="q"><summary>Why never rebuild a table (Recreate) and query it in the same step?</summary><p>Tasks in one step run in parallel, so the read can collide with the rebuild. Put the downstream query in the next step, which only starts when the first finishes.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="4">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 5 -->
+    <article class="phase" id="p5" hidden>
+      <div class="phead"><h3>5. Staging check</h3>
+      <p class="goal">Prove the numbers in staging are right before they touch Our company. Fix problems here, where they are cheap.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Validate directly in MySQL and fix anything wrong before loading.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Not involved.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Confirms unclear mappings and can provide a known number to trace.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: staging data is proven correct</h4>
+            <label class="chk"><input type="checkbox" data-id="g5-1"> Row counts per entity and fiscal year match the expected volume</label>
+            <label class="chk"><input type="checkbox" data-id="g5-2"> Period keys are correct and cover every expected month</label>
+            <label class="chk"><input type="checkbox" data-id="g5-3"> One known account and entity traced from source to staging</label>
+            <label class="chk"><input type="checkbox" data-id="g5-4"> Balance sheet accounts are cumulative, P&amp;L accounts are monthly movements (FPA)</label>
+            <label class="chk"><input type="checkbox" data-id="g5-5"> No dimension member format issues: leading zeros, whitespace, wrong key format</label>
+          </div>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p5"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>Validate with actual row-level data before you accept a diagnosis. A plausible theory is not evidence. Trace specific rows through each stage until you find where they change.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>Some negative amounts show up positive after transformation. Likely cause?</summary><p>A cleanup step stripped non-numeric characters, including the minus sign. Use a sign-preserving cast, shown in the MySQL section of the toolbox.</p></details>
+        <details class="q"><summary>Blank source cells turn into 0 in a numeric column. What do you check?</summary><p>Empty string versus NULL. In MySQL, <code>CAST('' AS UNSIGNED)</code> gives 0. Handle it explicitly with <code>COALESCE(NULLIF(TRIM(...), ''), ...)</code>.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="5">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 6 -->
+    <article class="phase" id="p6" hidden>
+      <div class="phead"><h3>6. Load and schedule</h3>
+      <p class="goal">Load into Our company and run it by hand first. Only then put it on a schedule, and do that in our company's product, not in DI Studio.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Run the first load manually, validate it, then set up the schedule.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Not involved.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Confirms how often the data should refresh.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: first load validated</h4>
+            <label class="chk"><input type="checkbox" data-id="g6-1"> First manual run completed and the data checked in Our company</label>
+            <label class="chk"><input type="checkbox" data-id="g6-2"> Cadence agreed with the client (daily overnight is typical for actuals)</label>
+            <label class="chk"><input type="checkbox" data-id="g6-3"> Schedule set in the Process Manager of our company's product</label>
+          </div>
+          <details class="deep" open><summary>Reading a job log</summary><div class="inner">
+            <table class="tbl"><tr><th>Status</th><th>Meaning</th></tr>
+              <tr><td><b>Success</b></td><td>Completed without error.</td></tr>
+              <tr><td><b>Error</b></td><td>This step failed.</td></tr>
+              <tr><td><b>Cancelled</b></td><td>A person cancelled it, or an earlier step failed and this one was skipped.</td></tr></table>
+            <p>The first step that is not Success is the real failure. Everything cancelled after it is downstream noise.</p>
+          </div></details>
+          <details class="deep"><summary>Where jobs can be triggered</summary><div class="inner"><ul>
+            <li>From DI Studio directly: manual runs only.</li>
+            <li>From FC, FPA or FPA+ through Process Manager: manual or scheduled.</li>
+            <li>Exposed task filters work in FPA+ Process Manager only, not in FC.</li>
+          </ul></div></details>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p6"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>Do not schedule before the first manual run has been validated. A wrong load repeated every night is harder to clean up than a single one.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>Where do you configure the nightly schedule?</summary><p>In the Process Manager of our company's product (FC, FPA or FPA+). DI Studio cannot schedule jobs.</p></details>
+        <details class="q"><summary>The log shows Error on step 2 and Cancelled on steps 3 and 4. Where do you look?</summary><p>Step 2. Steps 3 and 4 were skipped because of it.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Next phase</button><span class="sp"></span><button class="btn markdone" data-n="6">Mark phase complete</button></div>
+    </article>
+
+    <!-- PHASE 7 -->
+    <article class="phase" id="p7" hidden>
+      <div class="phead"><h3>7. Sign-off</h3>
+      <p class="goal">The client confirms the numbers. You hand over, close the engagement, and write down what you learned.</p></div>
+      <div class="pgrid">
+        <div>
+          <h4 class="sub">Who does what</h4>
+          <ul class="who">
+            <li style="--lc:var(--deep)"><b>Us</b><span>Investigate wrong amounts or periods, complete handover notes if needed, record new gotchas.</span></li>
+            <li style="--lc:var(--indigo)"><b>Our company Support</b><span>Not involved.</span></li>
+            <li style="--lc:var(--blue)"><b>Client</b><span>Compares Our company to their source system and signs off.</span></li>
+          </ul>
+          <div class="gate"><h4>Exit gate: the client signs off</h4>
+            <label class="chk"><input type="checkbox" data-id="g7-1"> Client compared one entity's GL balances in Our company to source for the same period</label>
+            <label class="chk"><input type="checkbox" data-id="g7-2"> Balance sheet opening balances match prior year closing balances</label>
+            <label class="chk"><input type="checkbox" data-id="g7-3"> Spot checks across balance sheet and P&amp;L accounts pass</label>
+            <label class="chk"><input type="checkbox" data-id="g7-4"> Dimension members resolve, with no missing or unknown members</label>
+            <label class="chk"><input type="checkbox" data-id="g7-5"> Schedule confirmed and handover notes done where needed</label>
+            <label class="chk"><input type="checkbox" data-id="g7-6"> New gotchas flagged for the team documentation</label>
+          </div>
+          <details class="deep" open><summary>Common findings and who owns them</summary><div class="inner">
+            <table class="tbl"><tr><th>Finding</th><th>Usual cause</th><th>Owner</th></tr>
+              <tr><td>Missing accounts</td><td>Dimension members not in our company's model</td><td>Client</td></tr>
+              <tr><td>Wrong amounts</td><td>Filter or cumulation logic</td><td>Us</td></tr>
+              <tr><td>Wrong periods</td><td>Date format or fiscal year construction</td><td>Us</td></tr>
+              <tr><td>Missing entities</td><td>Entity was not in the agreed scope</td><td>Revisit scope</td></tr></table>
+          </div></details>
+        </div>
+        <div class="aside">
+          <div class="box vba" data-ana="p7"><h4></h4><p></p></div>
+          <div class="box watch"><h4>Watch out</h4><p>A gotcha you found but did not write down will cost the next person the same hours. Flag it before you close the engagement.</p></div>
+        </div>
+      </div>
+      <div class="selfcheck"><h4>Self-check</h4>
+        <details class="q"><summary>The client reports accounts missing in Our company. Whose action is it?</summary><p>Usually the client's. The dimension members are not in our company's model. Confirm with our company's consultant if the model is still in progress.</p></details>
+        <details class="q"><summary>You found a new fix during the build. What happens to it?</summary><p>You flag it for promotion into the team documentation. Until the team approves and updates it, it is not canonical knowledge.</p></details>
+      </div>
+      <div class="pfoot"><button class="btn" data-go="prev">Previous phase</button><button class="btn primary" data-go="next">Open the toolbox</button><span class="sp"></span><button class="btn markdone" data-n="7">Mark phase complete</button></div>
+    </article>
+  </div>
+</section>
+
+<!-- TOOLBOX -->
+<section class="sec toolbox" id="toolbox">
+  <div class="wrap">
+    <h2>The toolbox</h2>
+    <p class="intro">The four technical areas you will use every week. Take them in any order. Each one is short on purpose, and the team documentation holds the full detail.</p>
+    <div class="ttabs" id="toolTabs" role="tablist">
+      <button class="ttab" role="tab" data-t="t1" aria-selected="true">DI Studio anatomy</button>
+      <button class="ttab" role="tab" data-t="t2" aria-selected="false">FC and FPA data</button>
+      <button class="ttab" role="tab" data-t="t3" aria-selected="false">Script Agent (API)</button>
+      <button class="ttab" role="tab" data-t="t4" aria-selected="false">MySQL in six moves</button>
+    </div>
+
+    <div class="tpanel" id="t1">
+      <div class="tgrid">
+        <div>
+          <h4 class="sub">Where things live</h4>
+          <div class="tree">
+            <div class="t t0"><b>Site</b><span>Tied to the DIS Controller. For cloud clients, Our company Support issues the Site id.</span></div>
+            <div class="t t1"><b>Agent</b><span>The connector type: Script, MySQL, SQL Server, SFTP, Excel/Text, ODBC, FC, FPA and more.</span></div>
+            <div class="t t2"><b>Connection</b><span>Credentials and settings for that agent, including <code>env[]</code> variables.</span></div>
+            <div class="t t3"><b>Query</b><span>What actually runs: a script, or a SQL statement.</span></div>
+          </div>
+          <h4 class="sub" style="margin-top:26px">How work runs</h4>
+          <div class="job"><div class="jh">Job</div>
+            <div class="stp"><div class="sl">Step 1<small>runs first</small></div><div class="tasks"><span>Task A</span><span>Task B</span><span>Task C</span></div><div class="par">Tasks in a step run at the same time</div></div>
+            <div class="stp"><div class="sl">Step 2<small>starts only after Step 1 completes</small></div><div class="tasks"><span>Task D</span></div></div>
+          </div>
+        </div>
+        <div>
+          <h4 class="sub">Facts that save you hours</h4>
+          <ul class="facts">
+            <li><b>Whole jobs only.</b> You cannot run a single step. Build a mini job or run the SQL directly.</li>
+            <li><b>Nothing can be disabled.</b> No skip toggle exists for tasks or steps.</li>
+            <li><b>No scheduler.</b> Scheduling happens in Process Manager in our company's product.</li>
+            <li><b>First failure is the real one.</b> Cancelled items after it are noise.</li>
+            <li><b>Three kinds of variable.</b> <code>query[]</code> filters live on a task. <code>env[]</code> lives on a connection and is where credentials go. <code>GetKey</code> and <code>SetKey</code> read and write the settings table <code>Our company_Data_Integration_Setting</code> in MySQL.</li>
+            <li><b>SQL Server destinations</b> need schema write permission, in both Recreate and Append modes.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="tpanel" id="t2" hidden>
+      <div class="tgrid">
+        <div>
+          <h4 class="sub">Two shapes of the same data</h4>
+          <table class="tbl"><tr><th></th><th>FC</th><th>FPA</th></tr>
+            <tr><td><b>Purpose</b></td><td>Financial Consolidation</td><td>Planning and analysis</td></tr>
+            <tr><td><b>Amounts</b></td><td>Always year to date, cumulative</td><td>Monthly. P&amp;L is the month's movement, balance sheet is a running total</td></tr>
+            <tr><td><b>Period key</b></td><td><code>yyyymmVVV000</code>, exactly 12 characters</td><td><code>yyyyMmm</code> or <code>yyyyPmm</code></td></tr>
+            <tr><td><b>Example</b></td><td><code>202604ACT000</code></td><td><code>2026M04</code> or <code>2026P04</code></td></tr>
+            <tr><td><b>Core fields</b></td><td>GL account, entity, period, amount, partner ID for intercompany</td><td>GL account, entity, time, amount, client-specific dimensions</td></tr></table>
+          <p>Never mix the two period formats. Always confirm the source date format and normalise it in staging before you load.</p>
+        </div>
+        <div>
+          <h4 class="sub">Try it: one account, two products</h4>
+          <p style="font-size:14.5px;color:var(--ink2)">Illustrative figures. Source movements for January to June are 100, 150, 120, 90, 110 and 130, with a zero opening balance and a January fiscal year start.</p>
+          <div class="seg" id="acctSeg"><button type="button" data-a="pl" aria-pressed="true">P&amp;L account</button><button type="button" data-a="bs" aria-pressed="false">Balance sheet account</button></div>
+          <div class="seg" id="monSeg"></div>
+          <div class="fx">
+            <div><small>FC receives</small><div class="key" id="fcKey"></div><div class="val" id="fcVal"></div></div>
+            <div class="fpa"><small>FPA receives</small><div class="key" id="fpaKey"></div><div class="val" id="fpaVal"></div></div>
+          </div>
+          <p id="fxNote" style="margin-top:12px;font-size:14.5px"></p>
+          <div class="box vba" data-ana="t2" style="margin-top:14px;padding:18px 20px;font-size:15px" hidden><h4 style="margin-bottom:8px"></h4><p style="margin:0"></p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tpanel" id="t3" hidden>
+      <p class="intro" style="margin-bottom:18px">The Script Agent is where you call APIs, page through results and hand rows to DI Studio. It is most relevant for API sources. One runtime quirk matters more than all the rest: DI Studio uses ClearScript, not Node.js.</p>
+      <div class="tgrid">
+        <div>
+          <div class="cap ok">Do this</div>
+<pre class="code">var month = query["Month"];
+if (!month) {
+    agent.Done(false);
+    throw new Error("Month filter is required.");
+}
+
+var response = http.Get(url, headers);
+if (!response.IsSuccess) {
+    agent.Done(false);
+    throw new Error("Fetch failed: " + response.StatusCode);
+}
+
+agent.Send(JSON.parse(response.GetString()).value);
+agent.Log("Page sent.");
+
+agent.Done(true);   // unconditional last line</pre>
+          <div class="cap no" style="margin-top:14px">Never this</div>
+<pre class="code">try {
+    // ...
+} catch (err) {
+    throw new Error(err.stack);  // undefined in ClearScript
+} finally {
+    agent.Done(true);            // fires even on failure
+}</pre>
+        </div>
+        <div>
+          <h4 class="sub">The rules</h4>
+          <ul class="facts">
+            <li><b>No try/catch/finally.</b> ClearScript throws strings, so <code>err.stack</code> and <code>err.message</code> are undefined and the real error disappears from the job log.</li>
+            <li><b><code>agent.Done(false)</code> right before every <code>throw</code>.</b> It is the only way DI Studio registers a failure.</li>
+            <li><b><code>agent.Done(true)</code> as the last line,</b> unconditionally, with no wrapper.</li>
+            <li><b>Retry only 502, 503 and 504.</b> A 400, 401 or 403 is a real bug and must fail fast.</li>
+            <li><b>Send per page.</b> Call <code>agent.Send</code> for each page. Never collect millions of rows in memory first.</li>
+            <li><b>Use <code>http.Get</code> and <code>http.Post</code>.</b> <code>XMLHttpRequest</code> does not exist on the server side and fails silently.</li>
+          </ul>
+          <h4 class="sub" style="margin-top:20px" id="habitTitle"></h4>
+          <table class="tbl" id="habitTbl"></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="tpanel" id="t4" hidden>
+      <p class="intro" style="margin-bottom:18px">You do not need all of SQL. Six moves cover most of our transformations. <span class="xlx">Each one is shown next to its Excel equivalent.</span> Before writing any of them from scratch, check the team's SQL pattern library.</p>
+      <div class="moves-wrap">
+        <div class="move"><h4>1. Filter rows</h4><div class="xl xlx">Excel: AutoFilter.</div>
+<pre>SELECT *
+FROM tbl_client_raw
+WHERE Entity = 'E01';</pre></div>
+        <div class="move"><h4>2. Helper columns first (CTE)</h4><div class="xl xlx">Excel: a scratch sheet of helper columns.</div><div class="xl">Put a Params CTE first so period logic lives in one place.</div>
+<pre>WITH Params AS (
+  SELECT Period AS FullCode,
+         LEFT(Period, 4) AS TargetYear,
+         CAST(SUBSTRING(Period, 5, 2) AS UNSIGNED) AS TargetMonth
+  FROM abc_FC_Actuals_ConsoCode
+  LIMIT 1
+)
+SELECT * FROM Params;</pre></div>
+        <div class="move"><h4>3. Lookups (JOIN)</h4><div class="xl xlx">Excel: VLOOKUP.</div><div class="xl">Trim both sides, or invisible spaces will break the match.</div>
+<pre>SELECT r.*, m.TargetAccount
+FROM tbl_client_raw r
+JOIN tbl_account_map m
+  ON UPPER(TRIM(r.Account)) = UPPER(TRIM(m.Account));</pre></div>
+        <div class="move"><h4>4. Totals (GROUP BY)</h4><div class="xl xlx">Excel: a pivot table.</div>
+<pre>SELECT Entity, Account, SUM(Amount) AS Total
+FROM tbl_client_clean
+GROUP BY Entity, Account;</pre></div>
+        <div class="move"><h4>5. Safe numbers</h4><div class="xl xlx">Excel: CDbl with error handling.</div><div class="xl">Keep the minus sign, and treat blanks on purpose.</div>
+<pre>CASE WHEN Amt REGEXP '^-?[0-9]+([.][0-9]+)?$'
+     THEN CAST(Amt AS DECIMAL(18,2))
+     ELSE 0 END
+
+COALESCE(NULLIF(TRIM(Amt), ''), '0')</pre></div>
+        <div class="move"><h4>6. Running totals</h4><div class="xl xlx">Excel: =SUM($B$2:B2) filled down.</div><div class="xl">Needed for balance sheet accounts in FPA. MySQL 8 has window functions. Check the team's SQL pattern library for the proven join version.</div>
+<pre>SELECT Entity, Account, PeriodNo,
+  SUM(Movement) OVER (
+    PARTITION BY Entity, Account
+    ORDER BY PeriodNo) AS Balance
+FROM tbl_client_clean;</pre></div>
+      </div>
+      <div class="how" style="margin-top:24px;background:#fff;color:var(--ink);border-left:5px solid var(--red)">
+        <h3 style="font-size:1.15rem">One staging trap to know now</h3>
+        <p style="margin:0">Loading in Recreate mode makes every column <code>longtext</code>. If a downstream step expects numbers or dates, add an explicit <code>ALTER TABLE</code> step to cast the columns. The standard pattern is a pure SELECT as the source query, with the target table set to Recreate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SURVIVAL KIT -->
+<section class="sec" id="survival">
+  <div class="wrap">
+    <h2>Survival kit</h2>
+    <p class="intro">What to keep within reach after the first week.</p>
+    <div class="surv">
+      <div>
+        <h4 class="sub"><span id="gotchaN">Ten</span> gotchas that cost the team real hours</h4>
+        <ol class="gotchas">
+          <li data-src="api"><span><b>try/catch hides errors in scripts.</b> Use <code>agent.Done(false)</code> before each throw and <code>agent.Done(true)</code> as the last line.</span></li>
+          <li><span><b>Only whole jobs run.</b> To test a step, build a mini job or run the SQL outside DI Studio.</span></li>
+          <li data-src="api"><span><b>No <code>XMLHttpRequest</code>.</b> Use <code>http.Get</code> and <code>http.Post</code>.</span></li>
+          <li><span><b>Stripping characters kills negatives.</b> Use sign-preserving casts.</span></li>
+          <li><span><b>Empty string is not NULL.</b> <code>CAST('' AS UNSIGNED)</code> is 0. Handle blanks explicitly.</span></li>
+          <li><span><b>Recreate makes everything longtext.</b> Cast columns with <code>ALTER TABLE</code> before using them.</span></li>
+          <li><span><b>Never Recreate and query the same table in one step.</b> Tasks in a step run in parallel.</span></li>
+          <li><span><b>Never mix FC and FPA period formats.</b> FC is <code>yyyymmVVV000</code>, FPA is <code>yyyyMmm</code>.</span></li>
+          <li data-src="api"><span><b>Retry only 502, 503 and 504.</b> A 400 or 401 should fail fast.</span></li>
+          <li><span><b>Cancelled steps are noise.</b> Find the first step that is not Success.</span></li>
+        </ol>
+      </div>
+      <div>
+        <h4 class="sub">Where to look</h4>
+        <ul class="facts" style="margin-bottom:18px">
+          <li><b>Team documentation:</b> house rules, source-specific guides and proven SQL transformations.</li>
+          <li><b>Script templates:</b> working DI Studio scripts per source.</li>
+          <li><b>Zendesk:</b> DIS, MySQL RDS, SFTP and IP whitelist requests.</li>
+          <li><b>Postman:</b> connection checks before an API build. Not used for SQL or SFTP sources.</li>
+        </ul>
+        <p style="font-size:14.5px">Ask a teammate for access to the team documentation.</p>
+
+        <h4 class="sub" style="margin-top:28px">Your first week, suggested</h4>
+        <label class="chk"><input type="checkbox" data-id="w1"> <span><b>Day 1.</b> Work through this route. Shadow a scoping call or review a recorded one.</span></label>
+        <label class="chk"><input type="checkbox" data-id="w2"> <span><b>Day 2.</b> Read the team documentation for one source end to end, ideally one matching a live client.</span></label>
+        <label class="chk" data-src="api"><input type="checkbox" data-id="w3"> <span><b>Day 3.</b> Run a Postman collection against a test API endpoint (API sources only). Note the auth, pagination and date format.</span></label>
+        <label class="chk" data-src="sql sftp"><input type="checkbox" data-id="w3b"> <span><b>Day 3.</b> Look at a sample of your source data (a test table or file). Note the field names, data types and date format.</span></label>
+        <label class="chk"><input type="checkbox" data-id="w4"> <span><b>Day 4.</b> Build a tiny throwaway job: source to MySQL staging in Recreate mode, then check the rows.</span></label>
+        <label class="chk"><input type="checkbox" data-id="w5"> <span><b>Day 5.</b> Write one transformation from the team's SQL pattern library and walk a teammate through it.</span></label>
+      </div>
+    </div>
+
+    <div class="how">
+      <h3>How we work</h3>
+      <ul>
+        <li>Evidence beats theory. Validate with row-level data before accepting a diagnosis.</li>
+        <li>Respect the gates. Do not start the next phase on hope.</li>
+        <li>Flag blockers early, with the exact error and a named owner.</li>
+        <li>Write to clients in short, direct sentences. Use numbered steps for technical asks, and never over-apologise.</li>
+        <li>Decline risky scope additions politely, and explain it in terms of data integrity. Leave billing and commercial questions to account management.</li>
+        <li>Write down what you learn, so the next engineer does not pay for it again.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Internal use, Our company Data Integration team. Built October 2026. The team documentation holds the current detail and takes precedence over this summary.</div></footer>
+
+<script>
+(function(){
+var ANA={"p1": {"none": "A discovery interview: where does the data live, who can give us access, what shape is it in, how often does it change, and who owns each dependency?", "excel": "Like asking the owner of a workbook where it lives, who can open it, what the columns mean and how often it is updated, before you build anything that depends on it.", "sql": "Scoping the source schema: which views or tables hold the data, who owns the database, what read permissions you will get and how often the data changes.", "bi": "Like scoping a dataset before building a report: where it lives, how often it refreshes, and who owns the connection.", "js": "Like reading the API docs and agreeing the contract before you write code: endpoints, authentication, limits and who owns what.", "cj": "Like requirements and interface agreement before implementation: what the source exposes, how you authenticate and who owns each dependency.", "py": "Like scoping a data source before writing a pipeline: where it lives, how you authenticate, the volume, the refresh rate and who owns each dependency.", "etl": "The discovery step before building a pipeline in any integration tool: source type, connectivity, data volume, schedule and ownership.", "api": "An API discovery call: which endpoints, which authentication, what limits apply and who owns the configuration on the client side.", "fin": "Like a kick-off for a new ledger: which system, which entities, which periods, and who can give us access to the trial balance.", "vba": "This is the interview with the owner of the source workbook before you write the macro: where does it live, who can open it, what shape is the data in, how often does it change, and who can grant you access."}, "p2": {"none": "Before any work can start, the systems, accounts and permissions have to exist. Some come from our side (Support) and some from the client.", "excel": "Like needing the shared drive permission, the data connection and the password before your report can refresh. The report can be perfect and still fail on day one without them.", "sql": "Getting a read-only login, network access (VPN or firewall rules) and a staging schema you can write to.", "bi": "Like getting gateway access, credentials and a service account before a report can refresh.", "js": "Like getting API keys, environment URLs and network access sorted before the first request can run.", "cj": "Like provisioning environments, service accounts and firewall rules before the first deployment.", "py": "Like getting credentials, environment variables and network access in place before the first run.", "etl": "Like setting up connections, service accounts and network access (agents or gateways) before a pipeline can run.", "api": "Getting your client ID, secret and allow-listed IPs before you can call anything.", "fin": "Like getting ledger access and a read-only login, plus the environments we load into.", "vba": "It is the shared drive permission, the API key and the VPN you need before your macro can run. The macro can be perfect and still fail on day one if you skipped this."}, "p3": {"none": "A quick test that the connection works and returns real data, before you build anything on top of it. Only needed for API sources.", "excel": "Like previewing a few rows in the data connection dialog before you build the pivot on top. Only for API sources.", "sql": "Only for API sources, so you will not meet it on database sources. Think of it as running a small SELECT with a LIMIT to see the real shape of the data before writing the full query.", "bi": "Like testing a connector and previewing rows before building the model. Only for API sources.", "js": "Like calling the endpoint with fetch or curl first, to see authentication, pagination and the real response shape before you write the loop.", "cj": "Like a quick smoke test with a REST client before you write the real client class.", "py": "Like trying requests.get in a notebook to see authentication, pagination and the real response before you write the loop.", "etl": "Like using a connection test or sample preview in your pipeline designer to confirm the source returns real data. Only for API sources.", "api": "Your home turf: the Postman work you already do. Authentication first, then a data call, then page two.", "fin": "A technical connection test that proves the system will actually hand over trial balance data. Only for API sources.", "vba": "It is testing one request in the Immediate window before you wrap it in a loop. If one call fails there, the loop will not save you."}, "p4": {"none": "A job is a recipe made of steps. Steps run one after another, and tasks inside a step run at the same time. MySQL staging is the holding area where raw data lands before it is cleaned and loaded.", "excel": "MySQL staging is your raw data tab that nobody edits by hand. A job is a sequence of stages: steps run in order, and tasks in the same step run at the same time.", "sql": "A job is a pipeline of steps. Steps run in sequence and tasks in a step run in parallel, so never put dependent statements in the same step. MySQL staging is your landing schema, and the transformations are SQL you would write anyway.", "bi": "Like a data preparation flow: ordered steps, with raw tables landing in a staging layer before the model.", "js": "Steps run in sequence and tasks in a step run concurrently, a bit like Promise.all. Scripts run in ClearScript, which is JavaScript-like but is not Node.js. Read the Script Agent rules before you start.", "cj": "A job is a workflow with sequential stages, and tasks in one stage run in parallel, so avoid dependencies inside a stage. Scripts run in ClearScript, where try/catch/finally is not available.", "py": "Steps are sequential stages and tasks in one step are parallel workers. MySQL staging is your landing table. Scripts run in ClearScript, a JavaScript-like runtime, not Python.", "etl": "A job is like a pipeline or package: steps are sequential stages and tasks in one step run in parallel, like parallel branches. MySQL staging is the landing zone. Unlike many tools, you can only run whole jobs and nothing can be disabled.", "api": "Your Postman requests become scripts in the Script Agent (ClearScript, not Node). You call the API, page through the results and send each page on. MySQL staging is where the rows land.", "fin": "Think of the job as a month-end checklist: steps run in order and tasks in one step run side by side. MySQL staging is the working trial balance you review before it goes into the consolidation or planning product.", "vba": "Jobs, steps and tasks are like Subs calling Subs, with one twist: tasks in the same step run at the same time. MySQL staging is your raw data sheet that nobody edits by hand. Everything downstream reads from it."}, "p5": {"none": "Check the numbers in the holding area against what you expect, so mistakes are caught before they reach the client's consolidation or planning product.", "excel": "Like reconciling your pivot against the source totals before you send the report to anyone.", "sql": "The checks you would run after any load: row counts, SUM checks by entity and period, and one account traced end to end.", "bi": "Like validating a dataset in the model: counts and totals against the source before anyone builds visuals on it.", "js": "Like writing assertions against the data: counts, key formats and one known value traced from source to staging.", "cj": "Like data-level tests after a load: counts, key formats and one known value traced through each stage.", "py": "Like asserting on a DataFrame: row counts per group, key formats and one known value traced end to end.", "etl": "Post-load validation: row counts, key checks and a known value reconciled across stages.", "api": "Like checking the response payload against what you expected, now at row level in the database.", "fin": "Like reviewing a trial balance: do totals tie to the ledger, are all entities and periods present, and does one known account agree?", "vba": "It is reconciling your pivot against the source totals before you send the report to anyone."}, "p6": {"none": "Run the load once by hand and check it. Only then put it on a recurring schedule, which is set in our company's product, not in DI Studio.", "excel": "Like refreshing the workbook by hand once and checking it before you set up a scheduled refresh. Here the schedule lives in our company's product, not in DI Studio.", "sql": "Like running a stored procedure by hand once and checking the output before putting it on a schedule. The scheduler is in our company's product, not in DI Studio.", "bi": "Like a manual refresh before you set a scheduled refresh. Here the schedule lives in our company's product.", "js": "Like running a script by hand once before you put it in cron or CI. The scheduler lives in our company's product.", "cj": "Like a manual run in a test environment before you add the scheduled trigger. The trigger is in our company's product, not in DI Studio.", "py": "Like running the pipeline by hand once before handing it to a scheduler. The scheduler is in our company's product.", "etl": "Like a manual test run before you enable the trigger. Scheduling lives in the Process Manager of our company's product, not in DI Studio.", "api": "Like running your Postman collection by hand before you automate it. The schedule lives in our company's product.", "fin": "Like a dry run of the close process before you make it recurring. The schedule lives in our company's product.", "vba": "In VBA, <code>Application.OnTime</code> lives inside the workbook. Here the scheduler lives in our company's product, and DI Studio has no scheduler at all."}, "p7": {"none": "The client checks the numbers against the system they already trust and agrees they are right.", "excel": "Like the user opening your finished report and checking it against the system they already trust.", "sql": "Like the business owner comparing your result set against the report they already trust.", "bi": "Like business users validating the report numbers against what they already trust.", "js": "Like acceptance testing: the client checks your output against the system they trust.", "cj": "Like user acceptance testing before release.", "py": "Like acceptance testing: the client checks your output against the system they trust.", "etl": "Like UAT sign-off: the client checks the loaded data against their source system.", "api": "Like the client verifying the payload you loaded matches what their own system shows.", "fin": "Like the controller reviewing and signing off the trial balance.", "vba": "It is user acceptance testing. The user opens your output and checks it against the system they already trust."}, "t2": {"fin": "FC stores the year-to-date trial balance. FPA stores the activity for the month on P&L accounts, like a monthly income statement. Balance sheet accounts are cumulative in both.", "vba": "Think of a year-to-date column against a this-month column in a P&L sheet. FC is the first and FPA is the second. Balance sheet accounts are cumulative in both.", "excel": "Think of a year-to-date column against a this-month column in a P&L sheet. FC is the first and FPA is the second. Balance sheet accounts are cumulative in both.", "sql": "FC is a running total over the year (like SUM OVER by period) and FPA holds the movement for each period on P&L accounts. Balance sheet accounts are cumulative in both."}};
+var HAB={"none": {"title": "What each thing is called in DI Studio", "rows": [["Call a web API", "<code>http.Get</code>, <code>http.Post</code>"], ["Report a failure", "<code>agent.Done(false)</code> then <code>throw</code>"], ["Pass rows on to the next task", "<code>agent.Send(page)</code> per page"], ["Write to the job log", "<code>agent.Log(...)</code>"], ["Hold settings and credentials", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "vba": {"title": "VBA habit to DI Studio", "rows": [["MSXML2 HTTP request", "<code>http.Get</code>, <code>http.Post</code>"], ["<code>On Error</code> handlers", "<code>agent.Done(false)</code> then <code>throw</code>"], ["Write each row to the sheet as you go", "<code>agent.Send(page)</code> per page"], ["<code>Debug.Print</code>", "<code>agent.Log(...)</code>"], ["Config cells or named ranges", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "js": {"title": "JavaScript habit to DI Studio", "rows": [["fetch, axios or XMLHttpRequest", "<code>http.Get</code>, <code>http.Post</code> (<code>XMLHttpRequest</code> does not exist here)"], ["try / catch", "Not available: <code>agent.Done(false)</code> then <code>throw</code>"], ["<code>console.log</code>", "<code>agent.Log(...)</code>"], ["Return or stream a page of results", "<code>agent.Send(page)</code> per page"], ["<code>process.env</code> or a <code>.env</code> file", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "cj": {"title": "C# / Java habit to DI Studio", "rows": [["HttpClient or HttpURLConnection", "<code>http.Get</code>, <code>http.Post</code>"], ["try / catch / finally", "Not available: <code>agent.Done(false)</code> then <code>throw</code>"], ["Console.WriteLine or a logger", "<code>agent.Log(...)</code>"], ["Yield or return a page of rows", "<code>agent.Send(page)</code> per page"], ["appsettings or environment variables", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "py": {"title": "Python habit to DI Studio", "rows": [["<code>requests.get</code>, <code>requests.post</code>", "<code>http.Get</code>, <code>http.Post</code>"], ["try / except", "Not available: <code>agent.Done(false)</code> then <code>throw</code>"], ["<code>print</code> or logging", "<code>agent.Log(...)</code>"], ["Yield a page of rows", "<code>agent.Send(page)</code> per page"], ["<code>os.environ</code> or a config file", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "etl": {"title": "ETL tool habit to DI Studio", "rows": [["REST or HTTP connector", "<code>http.Get</code>, <code>http.Post</code>"], ["Error path or failure route", "<code>agent.Done(false)</code> then <code>throw</code>"], ["Output to the next stage", "<code>agent.Send(page)</code> per page"], ["Pipeline log or trace", "<code>agent.Log(...)</code>"], ["Connection parameters and secrets", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}, "api": {"title": "Postman habit to DI Studio", "rows": [["A Postman request", "<code>http.Get</code>, <code>http.Post</code>"], ["A failed response (4xx, 5xx)", "<code>agent.Done(false)</code> then <code>throw</code>, and retry only 502, 503 and 504"], ["Page 1, page 2, and so on", "<code>agent.Send(page)</code> per page"], ["Postman console", "<code>agent.Log(...)</code>"], ["Postman environment variables", "<code>env[]</code>, <code>GetKey</code>, <code>SetKey</code>"]]}};
+var BGT={"none": "plain terms", "vba": "VBA", "excel": "Excel", "sql": "SQL", "bi": "BI tool", "js": "JavaScript", "cj": "C# / Java", "py": "Python", "etl": "ETL tool", "api": "API", "fin": "finance"};
+var SRC={
+ all:'Showing every source type. Items that apply to only some sources carry a small tag.',
+ api:'API source on a hosted DIS Controller: all seven phases apply, including the Postman check.',
+ sql:'SQL database source: the Postman check (phase 3) is skipped, and API-only items are hidden.',
+ sftp:'SFTP / file source: the Postman check (phase 3) is skipped, and API-only items are hidden.'
+};
+var SKIP={3:['sql','sftp']};
+var SRCNAME={sql:'SQL database sources',sftp:'SFTP / file sources'};
+var KEY='dio_onboarding_v2', state={done:{},checks:{},bg:'none',src:'all'};
+try{
+  var s=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(s&&s.done&&s.checks){
+    state.done=s.done; state.checks=s.checks;
+    if(s.bg&&BGT[s.bg]){state.bg=s.bg;}
+    if(s.src&&SRC[s.src]){state.src=s.src;}
+  }
+}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function qsa(sel){return Array.prototype.slice.call(document.querySelectorAll(sel));}
+
+var PH=[
+ {n:1,name:'Scoping call',us:'Run the call, agree the path, size the effort',sup:null,cl:'Bring IT or the ERP partner to the call',gate:'Path, owners and effort tier agreed'},
+ {n:2,name:'Provisioning',us:'Raise Zendesk tickets, chase client items',sup:'Provide DIS, MySQL RDS, SFTP, IP whitelist',cl:'Credentials, integration user, firewall rules',gate:'Every dependency delivered'},
+ {n:3,name:'Postman check (API only)',us:'API sources only: prove auth, data and pagination in Postman',sup:null,cl:'Fix access if the test fails',gate:'API sources: real rows come back'},
+ {n:4,name:'DI Studio build',us:'Extract, stage in MySQL, transform, load',sup:'Help with infrastructure issues',cl:'Answer mapping and dimension questions',gate:'Job runs end to end'},
+ {n:5,name:'Staging check',us:'Count rows, check periods, trace one account',sup:null,cl:'Confirm unclear mappings',gate:'Staging data proven correct'},
+ {n:6,name:'Load and schedule',us:'Manual first run, then schedule in Process Manager',sup:null,cl:'Confirm the cadence',gate:'First load validated'},
+ {n:7,name:'Sign-off',us:'Fix findings, hand over, record gotchas',sup:null,cl:'Compare balances to source and sign off',gate:'Client signs off'}
+];
+var OV={2:{
+ api:{sup:'Provide hosted DIS and MySQL RDS (SFTP if files are involved)',cl:'Credentials, integration user, firewall rules'},
+ sql:{sup:'Provide DIS (hosted or on-prem, depending on where the database lives), MySQL RDS, IP whitelist',cl:'Read-only database user, firewall or VPN access'},
+ sftp:{sup:'Provide DIS, SFTP and MySQL RDS, with the client IP range whitelisted',cl:'Deliver the files, share the IP range'}
+}};
+function applicable(n){return !(SKIP[n]&&SKIP[n].indexOf(state.src)>-1);}
+function PHv(p){
+  var o=(OV[p.n]&&OV[p.n][state.src])||{}, r={}, k;
+  for(k in p){r[k]=p[k];}
+  for(k in o){r[k]=o[k];}
+  return r;
+}
+
+var map=document.getElementById('map'), current=1;
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function buildMap(){
+  var h='<div class="rail"><i id="railFill"></i></div><div></div>';
+  PH.forEach(function(p0){
+    var p=PHv(p0), sk=!applicable(p.n);
+    h+='<button type="button" class="st'+(sk?' skip':'')+'" data-phase="'+p.n+'" aria-label="Phase '+p.n+': '+p.name+(sk?' (skipped for this source)':'')+'"><span class="node">'+p.n+'</span><span class="nm">'+p.name+(sk?'<small>skipped for this source</small>':'')+'</span></button>';
+  });
+  var lanes=[['us','Us','DI engineer','l-us'],['sup','Our company Support','Zendesk requests','l-sup'],['cl','Client','and ERP partner','l-cl']];
+  lanes.forEach(function(l){
+    h+='<div class="ll '+l[3]+'"><b>'+l[1]+'</b><span>'+l[2]+'</span></div>';
+    PH.forEach(function(p0){
+      var p=PHv(p0), sk=!applicable(p.n), t=sk?(l[0]==='us'?'Skipped: no Postman check for this source':null):p[l[0]];
+      h+='<div class="c'+(t?'':' none')+(sk?' skipcell':'')+'" data-phase="'+p.n+'">'+(t||'Nothing needed')+'</div>';
+    });
+  });
+  h+='<div class="ll lg"><b>Exit gate</b><span>do not move on until met</span></div>';
+  PH.forEach(function(p0){
+    var p=PHv(p0), sk=!applicable(p.n);
+    h+='<div class="c g'+(sk?' skipcell':'')+'" data-phase="'+p.n+'"><span class="dia"></span>'+(sk?'Skipped for this source':p.gate)+'</div>';
+  });
+  map.innerHTML=h;
+}
+
+function setPhase(n,scroll){
+  current=n;
+  qsa('.phase').forEach(function(el){el.hidden=(el.id!=='p'+n);});
+  qsa('#phaseTabs .tab').forEach(function(t){t.setAttribute('aria-selected',String(+t.dataset.phase===n));});
+  qsa('#map [data-phase]').forEach(function(c){c.classList.toggle('on',+c.dataset.phase===n);});
+  if(scroll){document.getElementById('detail').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});}
+}
+function stepPhase(dir){
+  var n=current+dir;
+  while(n>=1&&n<=7&&!applicable(n)){n+=dir;}
+  if(n<1){return;}
+  if(n>7){document.getElementById('toolbox').scrollIntoView({behavior:reduce?'auto':'smooth'});return;}
+  setPhase(n,true);
+}
+
+function refresh(){
+  var i, count=0, total=0, m=0;
+  for(i=1;i<=7;i++){if(applicable(i)){total++; if(state.done[i]){count++;}}}
+  for(i=1;i<=7;i++){if(state.done[i]||!applicable(i)){m=i;}else{break;}}
+  var fill=document.getElementById('railFill');
+  if(fill){fill.style.width=(m>1?((m-1)/6*100):0)+'%';}
+  qsa('.st').forEach(function(b){b.classList.toggle('done',!!state.done[b.dataset.phase]&&applicable(+b.dataset.phase));});
+  qsa('#phaseTabs .tab').forEach(function(t){
+    var n=+t.dataset.phase;
+    t.classList.toggle('isdone',!!state.done[n]&&applicable(n));
+    t.classList.toggle('isskip',!applicable(n));
+  });
+  qsa('.markdone').forEach(function(b){
+    var d=!!state.done[b.dataset.n];
+    b.classList.toggle('done',d);
+    b.textContent=d?'Phase complete (click to undo)':'Mark phase complete';
+  });
+  document.getElementById('progText').textContent=count+' of '+total+' phases marked complete';
+}
+
+/* ---------- personalisation ---------- */
+function addBadges(){
+  var NAMES={api:'API',sql:'SQL',sftp:'SFTP'};
+  qsa('[data-src]').forEach(function(el){
+    if(el.querySelector(':scope > .srctag, :scope > span > .srctag')){return;}
+    var tag=el.tagName, ok={LI:1,LABEL:1,TR:1,H5:1,H4:1,P:1,BUTTON:1,DIV:1};
+    if(!ok[tag]){return;}
+    var host=el;
+    if(tag==='TR'){host=el.cells[0];}
+    else if(tag==='LI'&&el.firstElementChild&&el.firstElementChild.tagName==='SPAN'){host=el.firstElementChild;}
+    var txt=el.getAttribute('data-src').split(' ').map(function(x){return NAMES[x]||x;}).join(', ');
+    var b=document.createElement('span'); b.className='srctag'; b.textContent=txt;
+    host.appendChild(b);
+  });
+}
+var WORDS=['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten'];
+function applyPersona(){
+  document.body.setAttribute('data-source',state.src);
+  document.body.setAttribute('data-xl',(['vba','excel','fin','bi'].indexOf(state.bg)>-1)?'1':'0');
+  document.getElementById('bgSel').value=state.bg;
+  qsa('#srcSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.s===state.src));});
+  document.getElementById('srcHint').textContent=SRC[state.src];
+  document.getElementById('bgHint').textContent=(state.bg==='none')
+    ? 'Pick the background closest to yours. The guide will explain things with analogies from it. You can change it at any time.'
+    : 'Explanations now use analogies from your background. Change it at any time.';
+  /* analogy boxes */
+  qsa('[data-ana]').forEach(function(box){
+    var t=box.getAttribute('data-ana'), d=ANA[t]||{};
+    var txt=d[state.bg]||(t==='t2'?'':d.none)||'';
+    box.hidden=!txt;
+    box.querySelector('h4').textContent='In '+BGT[state.bg]+' terms';
+    box.querySelector('p').innerHTML=txt;
+  });
+  /* script-agent habit table */
+  var hb=HAB[state.bg]||HAB.none, tb='';
+  hb.rows.forEach(function(r){tb+='<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';});
+  document.getElementById('habitTitle').textContent=hb.title;
+  document.getElementById('habitTbl').innerHTML=tb;
+  /* phase 3 note and skip state */
+  var note=document.getElementById('p3note'), sk=!applicable(3), p3=document.getElementById('p3');
+  p3.classList.toggle('skipped',sk);
+  if(sk){
+    note.innerHTML='<p><b>Skipped for this source.</b> The Postman check applies only to API sources on a hosted DIS Controller. '+SRCNAME[state.src]+' have no Postman check, so there is nothing to do here. Continue to the build (phase 4).</p>';
+  }else if(state.src==='api'){
+    note.innerHTML='<p><b>This phase applies to your source.</b> The Postman check is for API sources on a hosted DIS Controller.</p>';
+  }else{
+    note.innerHTML='<p><b>This step does not always happen.</b> The Postman check applies only to API sources on a hosted DIS Controller. SQL and SFTP sources have no Postman check: skip this phase, mark it complete and go straight to the build.</p>';
+  }
+  buildMap();
+  /* gotcha count */
+  var n=0; qsa('.gotchas li').forEach(function(li){if(li.offsetParent!==null){n++;}});
+  document.getElementById('gotchaN').textContent=WORDS[n]||String(n);
+  refresh();
+  setPhase((!applicable(current))?current:current,false);
+}
+
+/* ---------- events ---------- */
+map.addEventListener('click',function(e){
+  var t=e.target.closest('[data-phase]'); if(t){setPhase(+t.dataset.phase,true);}
+});
+document.getElementById('phaseTabs').addEventListener('click',function(e){
+  var t=e.target.closest('.tab'); if(t){setPhase(+t.dataset.phase,false);}
+});
+qsa('.pfoot').forEach(function(f){
+  f.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b){return;}
+    if(b.dataset.go==='prev'){stepPhase(-1);}
+    if(b.dataset.go==='next'){stepPhase(1);}
+    if(b.classList.contains('markdone')){
+      var n=b.dataset.n; if(state.done[n]){delete state.done[n];}else{state.done[n]=true;}
+      save(); refresh();
+    }
+  });
+});
+qsa('input[data-id]').forEach(function(c){
+  c.checked=!!state.checks[c.dataset.id];
+  c.addEventListener('change',function(){
+    if(c.checked){state.checks[c.dataset.id]=true;}else{delete state.checks[c.dataset.id];}
+    save();
+  });
+});
+document.getElementById('resetBtn').addEventListener('click',function(){
+  if(!window.confirm('Reset all progress and checklists? Your background and source choices are kept.')){return;}
+  state.done={}; state.checks={}; save();
+  qsa('input[data-id]').forEach(function(c){c.checked=false;});
+  refresh();
+});
+document.getElementById('bgSel').addEventListener('change',function(){state.bg=this.value; save(); applyPersona();});
+document.getElementById('srcSeg').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b){return;}
+  state.src=b.dataset.s; save(); applyPersona();
+});
+
+/* toolbox tabs */
+document.getElementById('toolTabs').addEventListener('click',function(e){
+  var b=e.target.closest('.ttab'); if(!b){return;}
+  qsa('.ttab').forEach(function(x){x.setAttribute('aria-selected',String(x===b));});
+  qsa('.tpanel').forEach(function(p){p.hidden=(p.id!==b.dataset.t);});
+});
+
+/* FC vs FPA demo */
+var MV=[100,150,120,90,110,130], MN=['Jan','Feb','Mar','Apr','May','Jun'], acct='pl', mon=2;
+var monSeg=document.getElementById('monSeg');
+MN.forEach(function(n,i){var b=document.createElement('button');b.type='button';b.textContent=n;b.dataset.m=i;b.setAttribute('aria-pressed',String(i===mon));monSeg.appendChild(b);});
+function renderFx(){
+  var mm=('0'+(mon+1)).slice(-2), run=0, i;
+  for(i=0;i<=mon;i++){run+=MV[i];}
+  var fpa=(acct==='pl')?MV[mon]:run;
+  document.getElementById('fcKey').textContent='2026'+mm+'ACT000';
+  document.getElementById('fcVal').textContent=run;
+  document.getElementById('fpaKey').textContent='2026M'+mm;
+  document.getElementById('fpaVal').textContent=fpa;
+  document.getElementById('fxNote').textContent=(acct==='pl')
+    ? 'FC always stores the year to date total, so every month adds to the one before. FPA stores only the movement for that month.'
+    : 'Balance sheet accounts are cumulative in both products, so the two numbers match. P&L accounts are where FC and FPA diverge.';
+  monSeg.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',String(+b.dataset.m===mon));});
+  qsa('#acctSeg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.a===acct));});
+}
+monSeg.addEventListener('click',function(e){var b=e.target.closest('button');if(b){mon=+b.dataset.m;renderFx();}});
+document.getElementById('acctSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(b){acct=b.dataset.a;renderFx();}});
+
+addBadges();
+applyPersona();
+setPhase(1,false);
+renderFx();
+})();
+
+</script>
+</body>
+</html>
